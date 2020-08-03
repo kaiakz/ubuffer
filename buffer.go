@@ -49,14 +49,21 @@ func (buffer *Buffer) Finalize() error {
 
 func (buffer *Buffer) Write(p []byte) (n int, err error) {
 	if buffer.swap != nil {
-		return buffer.swap.Write(p)
+		return buffer.swap.Write(p[:])
 	}
-	return buffer.mem.Write(p)
+	return buffer.mem.Write(p[:])
 }
 
 func (buffer *Buffer) Read(p []byte) (n int, err error) {
 	if buffer.swap != nil {
-		return buffer.swap.Read(p)
+		return buffer.swap.Read(p[:])
 	}
-	return buffer.mem.Read(p)
+	return buffer.mem.Read(p[:])
+}
+
+func (buffer *Buffer) Seek(offset int64, whence int) (ret int64, err error) {
+	if buffer.swap != nil {
+		return buffer.swap.Seek(offset, whence)
+	}
+	return 0, nil
 }

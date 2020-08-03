@@ -20,7 +20,11 @@ func NewBuffer(cap int64) *Buffer {
 		err error
 	)
 	if cap > MEMSIZE {
-		swap, err = ioutil.TempFile("", "ubuffer")
+		swap, err = ioutil.TempFile("", "ubuffer-*")
+		if err != nil || swap == nil || swap.Close() != nil{
+			return nil
+		}
+		swap, err = os.OpenFile(swap.Name(), os.O_APPEND | os.O_RDWR, 0644)
 		if err != nil {
 			return nil
 		}
@@ -34,6 +38,10 @@ func NewBuffer(cap int64) *Buffer {
 func (buffer *Buffer) Finalize() error {
 	buffer.mem.Reset()
 	if buffer.swap != nil {
+		err := buffer.swap.Close()
+		if err != nil {
+			return err
+		}
 		return os.Remove(buffer.swap.Name())
 	}
 	return nil
